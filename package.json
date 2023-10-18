@@ -14,7 +14,7 @@
     "build:universal": "rimraf ./dist && rimraf ./universal && yarn build:ts && yarn build:asm && shx mv dist universal",
     "build:web": "rimraf ./dist && rimraf ./web && yarn build:ts && yarn build:asm --env web && shx mv dist web",
     "build:ts": "tsc -p .",
-    "build:asm": "yarn _pull-docker-image && ts-node build/compile-asm",
+    "build:asm": "ts-node build/compile-asm",
     "prettier-all": "prettier --write ."
   },
   "files": [

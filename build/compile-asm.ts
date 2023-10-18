@@ -5,8 +5,10 @@ import * as commandLineArgs from "command-line-args";
 
 const cmdLineOptions = commandLineArgs([{ name: "env", type: String, defaultValue: "universal" }]);
 
-const wasmDir = path.join(__dirname, "..", "src", "wasm");
-console.log(`using "${wasmDir}" as wasm dir`);
+const wasmSrcDir = path.join(__dirname, "..", "src", "wasm");
+const distDir = path.join(__dirname, "..", "dist");
+const wasmDistDir = path.join(distDir, "wasm");
+console.log(`using "${wasmSrcDir}" as wasm dir`);
 
 function build(wasmMode: boolean, environment: string) {
   const debug = false;
@@ -14,9 +16,9 @@ function build(wasmMode: boolean, environment: string) {
   const options = [
     "--bind",
     "--no-entry",
-    "-s STRICT=1",
+    // "-s STRICT=1",
     "-s ALLOW_MEMORY_GROWTH=1",
-    "-s EXIT_RUNTIME=0",
+    // "-s EXIT_RUNTIME=0",
     "-s SINGLE_FILE=1",
     "-s INVOKE_RUN=0",
     "-s NODEJS_CATCH_EXIT=0",
@@ -49,17 +51,17 @@ function build(wasmMode: boolean, environment: string) {
 
   const output = wasmMode ? `clipper-wasm.js` : `clipper.js`;
 
-  const cmd = `docker run --rm -v ${wasmDir}:/src emscripten/emsdk em++ ${options.join(
+  try { fs.mkdirSync(distDir); } catch (e) {}
+  try { fs.mkdirSync(wasmDistDir); } catch (e) {}
+
+  const cmd = `em++ ${options.join(
     " "
-  )} clipper.cpp -o ${output}`;
+  )} ${wasmSrcDir}/clipper.cpp -o ${wasmDistDir}/${output}`;
   const returnData = shelljs.exec(cmd);
   if (returnData.code !== 0) {
     console.error(`build failed with error code ${returnData.code}`);
     process.exit(returnData.code);
   }
-
-  shelljs.mkdir("dist", "dist/wasm");
-  shelljs.cp(`src/wasm/${output}`, `dist/wasm/${output}`);
 }
 
 console.log("building asmjs version for env " + cmdLineOptions.env);
