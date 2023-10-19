@@ -366,10 +366,6 @@ namespace Clipper2Lib {
 		PolyPath64List::const_iterator begin() const { return childs_.cbegin(); }
 		PolyPath64List::const_iterator end() const { return childs_.cend(); }
 
-		// TODO not returning pointer will have compiler error
-		// Because using unique_ptr?
-		PolyPath64List* JS_GetChilds() { return &childs_; }
-
 		PolyPath64* AddChild(const Path64& path) override
 		{
 			auto p = std::make_unique<PolyPath64>(this);

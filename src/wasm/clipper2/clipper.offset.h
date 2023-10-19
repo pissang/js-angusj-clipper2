@@ -80,7 +80,7 @@ private:
 public:
 	explicit ClipperOffset(double miter_limit = 2.0,
 		double arc_tolerance = 0.0,
-		bool preserve_collinear = false, 
+		bool preserve_collinear = false,
 		bool reverse_solution = false) :
 		miter_limit_(miter_limit), arc_tolerance_(arc_tolerance),
 		preserve_collinear_(preserve_collinear),
@@ -92,23 +92,23 @@ public:
 	void AddPath(const Path64& path, JoinType jt_, EndType et_);
 	void AddPaths(const Paths64& paths, JoinType jt_, EndType et_);
 	void Clear() { groups_.clear(); norms.clear(); };
-	
+
 	void Execute(double delta, Paths64& paths);
 	void Execute(double delta, PolyTree64& polytree);
 	void Execute(DeltaCallback64 delta_cb, Paths64& paths);
 
-	double MiterLimit() const { return miter_limit_; }
-	void MiterLimit(double miter_limit) { miter_limit_ = miter_limit; }
+	double GetMiterLimit() const { return miter_limit_; }
+	void SetMiterLimit(double miter_limit) { miter_limit_ = miter_limit; }
 
 	//ArcTolerance: needed for rounded offsets (See offset_triginometry2.svg)
-	double ArcTolerance() const { return arc_tolerance_; }
-	void ArcTolerance(double arc_tolerance) { arc_tolerance_ = arc_tolerance; }
+	double GetArcTolerance() const { return arc_tolerance_; }
+	void SetArcTolerance(double arc_tolerance) { arc_tolerance_ = arc_tolerance; }
 
-	bool PreserveCollinear() const { return preserve_collinear_; }
-	void PreserveCollinear(bool preserve_collinear){preserve_collinear_ = preserve_collinear;}
-	
-	bool ReverseSolution() const { return reverse_solution_; }
-	void ReverseSolution(bool reverse_solution) {reverse_solution_ = reverse_solution;}
+	bool GetPreserveCollinear() const { return preserve_collinear_; }
+	void SetPreserveCollinear(bool preserve_collinear){preserve_collinear_ = preserve_collinear;}
+
+	bool GetReverseSolution() const { return reverse_solution_; }
+	void SetReverseSolution(bool reverse_solution) {reverse_solution_ = reverse_solution;}
 
 #ifdef USINGZ
 	void SetZCallback(ZCallback64 cb) { zCallback64_ = cb; }

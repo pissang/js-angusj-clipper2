@@ -93,16 +93,16 @@ namespace Clipper2Lib
     T x;
     T y;
 
-  void JS_SetX(double x) { this->x = (T)x; };
-  double JS_GetX() const { return (double)this->x; };
-  void JS_SetY(double y) { this->y = (T)y; };
-  double JS_GetY() const { return (double)this->y; };
+  void JS_SetX(T x) { this->x = (T)x; };
+  T JS_GetX() const { return (T)this->x; };
+  void JS_SetY(T y) { this->y = (T)y; };
+  T JS_GetY() const { return (T)this->y; };
 
 #ifdef USINGZ
     int64_t z;
 
-    void JS_SetZ(double z) { this->z = (T)z; };
-    double JS_GetZ() const { return (double)this->z; };
+    void JS_SetZ(T z) { this->z = (T)z; };
+    T JS_GetZ() const { return (T)this->z; };
 
     template <typename T2>
     inline void Init(const T2 x_ = 0, const T2 y_ = 0, const int64_t z_ = 0)
@@ -270,6 +270,15 @@ namespace Clipper2Lib
         right = bottom = -(std::numeric_limits<int64_t>::max)();
       }
     }
+
+    T JS_GetLeft() {return (T)left;};
+    void JS_SetLeft(T left) {this->left = (T)left;};
+    T JS_GetTop() {return (T)top;};
+    void JS_SetTop(T top) {this->top = (T)top;};
+    T JS_GetRight() {return (T)right;};
+    void JS_SetRight(T right) {this->right = (T)right;};
+    T JS_GetBottom() {return (T)bottom;};
+    void JS_SetBottom(T bottom) {this->bottom = (T)bottom;};
 
     T Width() const { return right - left; }
     T Height() const { return bottom - top; }

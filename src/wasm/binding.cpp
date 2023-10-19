@@ -144,7 +144,7 @@ EMSCRIPTEN_BINDINGS(Clipper2Lib) {
     .value("Negative", FillRule::Negative)
     ;
 
-  class_<Point64>("IntPoint")
+  class_<Point64>("Point")
     .property("x", &Point64::JS_GetX, &Point64::JS_SetX)
     .property("y", &Point64::JS_GetY, &Point64::JS_SetY)
 #ifdef use_xyz
@@ -185,75 +185,66 @@ EMSCRIPTEN_BINDINGS(Clipper2Lib) {
     .function("count", &PolyPath64::Count)
     .function("isHole", &PolyPath64::IsHole)
     .function("getParent", &PolyPath64::JS_GetParent, allow_raw_pointers())
-    .function("getChilds", &PolyPath64::JS_GetChilds, allow_raw_pointers());
+    .function("child", &PolyPath64::Child, allow_raw_pointers());
+    // .function("getChilds", &PolyPath64::JS_GetChilds, allow_raw_pointers());
 
   // register_vector<std::unique_ptr<PolyPath64>>("vector<PolyPath>");
 
   // TODO PolyTree64 is same with PolyPath64
 
-  // function("IsPositive", &IsPositive);
   // function("area", select_overload<double(const Path64&)>(&Area));
-  // function("pointInPolygon", select_overload<int(const Point64 &, const Path64 &)>(&PointInPolygon));
+  function("isPositive", &IsPositive<int64_t>);
+  function("pointInPolygon", &PointInPolygon<int64_t>);
 
-  // function("simplifyPolygon", &SimplifyPolygon);
-  // function("simplifyPolygonsInOut", select_overload<void(const Paths &, Paths &, PolyFillType)>(&SimplifyPolygons));
-  // function("simplifyPolygonsOverwrite", select_overload<void(Paths &, PolyFillType)>(&SimplifyPolygons));
+  function("simplifyPath", &SimplifyPath<int64_t>);
+  function("simplifyPaths", &SimplifyPaths<int64_t>);
 
-  // function("cleanPolygon", select_overload<void(const Path&, Path&, double)>(&CleanPolygon));
-  // function("cleanPolygon", select_overload<void(Path&, double)>(&CleanPolygon));
-  // function("cleanPolygons", select_overload<void(const Paths&, Paths&, double)>(&CleanPolygons));
-  // function("cleanPolygons", select_overload<void(Paths&, double)>(&CleanPolygons));
 
-  // function("minkowskiSumPath", select_overload<void(const Path64&, const Path64&, Paths64&, bool)>(&MinkowskiSum));
-  // function("minkowskiSumPaths", select_overload<void(const Path64&, const Paths64&, Paths64&, bool)>(&MinkowskiSum));
-  // function("minkowskiDiff", &MinkowskiDiff);
+  function("minkowskiSumPath", select_overload<Paths64(const Path64&, const Path64&, bool)>(&MinkowskiSum));
+  function("minkowskiDiff", select_overload<Paths64(const Path64&, const Path64&, bool)>(&MinkowskiDiff));
 
-  // function("polyTreeToPaths", &PolyTreeToPaths);
-  // function("closedPathsFromPolyTree", &ClosedPathsFromPolyTree);
-  // function("openPathsFromPolyTree", &OpenPathsFromPolyTree);
+  function("polyTreeToPaths", &PolyTreeToPaths64);
 
-  // function("reversePath", &ReversePath);
-  // function("reversePaths", &ReversePaths);
+  // TODO
+  // class_<Rect64>("Rect")
+    // .constructor<int64_t, int64_t, int64_t, int64_t>()
+    // .property("left", &Rect64::JS_GetLeft, &Rect64::JS_SetLeft);
+    // .property("top", &Rect64::JS_GetTop, &Rect64::JS_SetTop)
+    // .property("right", &Rect64::JS_GetRight, &Rect64::JS_SetRight)
+    // .property("bottom", &Rect64::JS_GetBottom, &Rect64::JS_SetBottom);
 
-  // class_<IntRect>("IntRect")
-  //   .property("left", &IntRect::JS_GetLeft, &IntRect::JS_SetLeft)
-  //   .property("top", &IntRect::JS_GetTop, &IntRect::JS_SetTop)
-  //   .property("right", &IntRect::JS_GetRight, &IntRect::JS_SetRight)
-  //   .property("bottom", &IntRect::JS_GetBottom, &IntRect::JS_SetBottom)
-  //   ;
+  class_<Clipper64>("Clipper")
+    .constructor<>()
+    .function("clear", &ClipperBase::Clear)
+    // .function("getBounds", &ClipperBase::GetBounds)
+    .property("preserveCollinear",
+      &ClipperBase::JS_GetPreserveCollinear,
+      &ClipperBase::JS_SetPreserveCollinear
+    )
+    .property("reverseSolution",
+      &ClipperBase::JS_GetReverseSolution,
+      &ClipperBase::JS_SetReverseSolution
+    )
+    .function("addSubject", &Clipper64::AddSubject)
+    .function("addOpenSubject", &Clipper64::AddOpenSubject)
+    .function("addClip", &Clipper64::AddClip)
+    .function("executePaths", select_overload<bool(ClipType, FillRule, Paths64 &)>(&Clipper64::Execute))
+    .function("executePathsOpen", select_overload<bool(ClipType, FillRule, Paths64 &, Paths64 &)>(&Clipper64::Execute))
+    .function("executePolyTree", select_overload<bool(ClipType, FillRule, PolyTree64 &)>(&Clipper64::Execute))
+    .function("executePolyTreeOpen", select_overload<bool(ClipType, FillRule, PolyTree64 &, Paths64 &)>(&Clipper64::Execute))
+#ifdef use_xyz
+    // .function("zFillFunction", &Clipper::ZFillFunction)
+#endif
+    ;
 
-    class_<Clipper64>("Clipper")
-      .constructor<>()
-      .function("clear", &ClipperBase::Clear)
-      // .function("getBounds", &ClipperBase::GetBounds)
-      .property("preserveCollinear",
-        &ClipperBase::JS_GetPreserveCollinear,
-        &ClipperBase::JS_SetPreserveCollinear
-      )
-      .property("reverseSolution",
-        &ClipperBase::JS_GetReverseSolution,
-        &ClipperBase::JS_SetReverseSolution
-      )
-      .function("addSubject", &Clipper64::AddSubject)
-      .function("addOpenSubject", &Clipper64::AddOpenSubject)
-      .function("addClip", &Clipper64::AddClip)
-      .function("executePaths", select_overload<bool(ClipType, FillRule, Paths64 &)>(&Clipper64::Execute))
-      .function("executePathsOpen", select_overload<bool(ClipType, FillRule, Paths64 &, Paths64 &)>(&Clipper64::Execute))
-      .function("executePolyTree", select_overload<bool(ClipType, FillRule, PolyTree64 &)>(&Clipper64::Execute))
-      .function("executePolyTreeOpen", select_overload<bool(ClipType, FillRule, PolyTree64 &, Paths64 &)>(&Clipper64::Execute))
-  #ifdef use_xyz
-      // .function("zFillFunction", &Clipper::ZFillFunction)
-  #endif
-      ;
-
-  // class_<ClipperOffset>("ClipperOffset")
-  //   .constructor<double, double>()
-  //   .function("addPath", &ClipperOffset::AddPath)
-  //   .function("addPaths", &ClipperOffset::AddPaths)
-  //   .function("executePaths", select_overload<void(Paths&, double)>(&ClipperOffset::Execute))
-  //   .function("executePolyTree", select_overload<void(PolyTree&, double)>(&ClipperOffset::Execute))
-  //   .function("clear", &ClipperOffset::Clear)
-  //   .property("miterLimit", &ClipperOffset::MiterLimit)
-  //   .property("arcTolerance", &ClipperOffset::ArcTolerance)
-  //   ;
+  class_<ClipperOffset>("ClipperOffset")
+      .function("addPath", &ClipperOffset::AddPath)
+      .function("addPaths", &ClipperOffset::AddPaths)
+      .function("executePaths", select_overload<void(double, Paths64&)>(&ClipperOffset::Execute))
+      .function("executePolyTree", select_overload<void(double, PolyTree64&)>(&ClipperOffset::Execute))
+      .function("clear", &ClipperOffset::Clear)
+      .property("miterLimit", &ClipperOffset::GetMiterLimit, &ClipperOffset::SetMiterLimit)
+      .property("arcTolerance", &ClipperOffset::GetArcTolerance, &ClipperOffset::SetArcTolerance)
+      .property("preserveCollinear", &ClipperOffset::GetPreserveCollinear, &ClipperOffset::SetPreserveCollinear)
+      .property("reverseSolution", &ClipperOffset::GetReverseSolution, &ClipperOffset::SetReverseSolution);
 }
