@@ -179,17 +179,15 @@ EMSCRIPTEN_BINDINGS(Clipper2Lib) {
     .value("Square", EndType::Square);
 
   class_<PolyPath64>("PolyPath")
-    .constructor<>()
-    .property("polygon", &PolyPath64::Polygon)
-    .property("child", &PolyPath64::Child)
-    // .function("getParent", &PolyPath64::JS_GetParent, allow_raw_pointers())
-    // .function("getNext", &PolyPath64::GetNext, allow_raw_pointers())
-    .function("isHole", &PolyPath64::IsHole)
+    .constructor<PolyPath64*>()
+    .function("polygon", &PolyPath64::Polygon)
     .function("area", &PolyPath64::Area)
-    // .function("isOpen", &PolyPath64::IsOpen)
-    .function("count", &PolyPath64::Count);
+    .function("count", &PolyPath64::Count)
+    .function("isHole", &PolyPath64::IsHole)
+    .function("getParent", &PolyPath64::JS_GetParent, allow_raw_pointers())
+    .function("getChilds", &PolyPath64::JS_GetChilds, allow_raw_pointers());
 
-  register_vector<PolyPath64*>("PolyPath64[]");
+  // register_vector<std::unique_ptr<PolyPath64>>("vector<PolyPath>");
 
   // TODO PolyTree64 is same with PolyPath64
 
@@ -224,32 +222,29 @@ EMSCRIPTEN_BINDINGS(Clipper2Lib) {
   //   .property("bottom", &IntRect::JS_GetBottom, &IntRect::JS_SetBottom)
   //   ;
 
-  class_<ClipperBase>("ClipperBase")
-    .constructor<>()
-    .function("clear", &ClipperBase::Clear)
-    // .function("getBounds", &ClipperBase::GetBounds)
-    .property("preserveCollinear",
-      &ClipperBase::JS_GetPreserveCollinear,
-      &ClipperBase::JS_SetPreserveCollinear
-    )
-    .property("reverseSolution",
-      &ClipperBase::JS_GetReverseSolution,
-      &ClipperBase::JS_SetReverseSolution
-    );
-
-  class_<Clipper64, base<ClipperBase>>("Clipper")
-    .constructor<>()
-    .function("addSubject", &Clipper64::AddSubject)
-    .function("addOpenSubject", &Clipper64::AddOpenSubject)
-    .function("addClip", &Clipper64::AddClip)
-    .function("executePaths", select_overload<bool(ClipType, FillRule, Paths64 &)>(&Clipper64::Execute))
-    .function("executePathsOpen", select_overload<bool(ClipType, FillRule, Paths64 &, Paths64 &)>(&Clipper64::Execute))
-    .function("executePolyTree", select_overload<bool(ClipType, FillRule, PolyTree64 &)>(&Clipper64::Execute))
-    .function("executePolyTreeOpen", select_overload<bool(ClipType, FillRule, PolyTree64 &, Paths64 &)>(&Clipper64::Execute))
-#ifdef use_xyz
-    // .function("zFillFunction", &Clipper::ZFillFunction)
-#endif
-    ;
+    class_<Clipper64>("Clipper")
+      .constructor<>()
+      .function("clear", &ClipperBase::Clear)
+      // .function("getBounds", &ClipperBase::GetBounds)
+      .property("preserveCollinear",
+        &ClipperBase::JS_GetPreserveCollinear,
+        &ClipperBase::JS_SetPreserveCollinear
+      )
+      .property("reverseSolution",
+        &ClipperBase::JS_GetReverseSolution,
+        &ClipperBase::JS_SetReverseSolution
+      )
+      .function("addSubject", &Clipper64::AddSubject)
+      .function("addOpenSubject", &Clipper64::AddOpenSubject)
+      .function("addClip", &Clipper64::AddClip)
+      .function("executePaths", select_overload<bool(ClipType, FillRule, Paths64 &)>(&Clipper64::Execute))
+      .function("executePathsOpen", select_overload<bool(ClipType, FillRule, Paths64 &, Paths64 &)>(&Clipper64::Execute))
+      .function("executePolyTree", select_overload<bool(ClipType, FillRule, PolyTree64 &)>(&Clipper64::Execute))
+      .function("executePolyTreeOpen", select_overload<bool(ClipType, FillRule, PolyTree64 &, Paths64 &)>(&Clipper64::Execute))
+  #ifdef use_xyz
+      // .function("zFillFunction", &Clipper::ZFillFunction)
+  #endif
+      ;
 
   // class_<ClipperOffset>("ClipperOffset")
   //   .constructor<double, double>()

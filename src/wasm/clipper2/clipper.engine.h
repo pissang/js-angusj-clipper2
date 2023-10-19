@@ -314,6 +314,8 @@ namespace Clipper2Lib {
 		PolyPath(const PolyPath&) = delete;
 		PolyPath& operator=(const PolyPath&) = delete;
 
+		PolyPath* JS_GetParent() { return parent_; }
+
 		unsigned Level() const
 		{
 			unsigned result = 0;
@@ -363,6 +365,10 @@ namespace Clipper2Lib {
 
 		PolyPath64List::const_iterator begin() const { return childs_.cbegin(); }
 		PolyPath64List::const_iterator end() const { return childs_.cend(); }
+
+		// TODO not returning pointer will have compiler error
+		// Because using unique_ptr?
+		PolyPath64List* JS_GetChilds() { return &childs_; }
 
 		PolyPath64* AddChild(const Path64& path) override
 		{
