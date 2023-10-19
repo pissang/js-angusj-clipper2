@@ -1,3 +1,26 @@
 {
-  "typescript.tsdk": "node_modules\\typescript\\lib"
+  "typescript.tsdk": "node_modules\\typescript\\lib",
+  "files.associations": {
+    "*.essl": "glsl",
+    "*.tmpl": "html",
+    "__availability": "cpp",
+    "__config": "cpp",
+    "__hash_table": "cpp",
+    "__tree": "cpp",
+    "__verbose_abort": "cpp",
+    "atomic": "cpp",
+    "charconv": "cpp",
+    "exception": "cpp",
+    "functional": "cpp",
+    "optional": "cpp",
+    "string": "cpp",
+    "tuple": "cpp",
+    "variant": "cpp",
+    "algorithm": "cpp",
+    "complex": "cpp",
+    "__debug": "cpp",
+    "__functional_03": "cpp",
+    "memory": "cpp",
+    "type_traits": "cpp"
+  }
 }

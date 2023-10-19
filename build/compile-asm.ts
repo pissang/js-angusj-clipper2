@@ -8,6 +8,7 @@ const cmdLineOptions = commandLineArgs([{ name: "env", type: String, defaultValu
 const wasmSrcDir = path.join(__dirname, "..", "src", "wasm");
 const distDir = path.join(__dirname, "..", "dist");
 const wasmDistDir = path.join(distDir, "wasm");
+
 console.log(`using "${wasmSrcDir}" as wasm dir`);
 
 function build(wasmMode: boolean, environment: string) {
@@ -54,9 +55,15 @@ function build(wasmMode: boolean, environment: string) {
   try { fs.mkdirSync(distDir); } catch (e) {}
   try { fs.mkdirSync(wasmDistDir); } catch (e) {}
 
+  const files = [
+    'clipper.engine.cpp',
+    'clipper.offset.cpp',
+    'clipper.rectclip.cpp',
+    'binding.cpp',
+  ]
   const cmd = `em++ ${options.join(
     " "
-  )} ${wasmSrcDir}/clipper.cpp -o ${wasmDistDir}/${output}`;
+  )} ${files.map(file => wasmSrcDir + '/' + file).join(' ')} -std=c++17 -o ${wasmDistDir}/${output}`;
   const returnData = shelljs.exec(cmd);
   if (returnData.code !== 0) {
     console.error(`build failed with error code ${returnData.code}`);

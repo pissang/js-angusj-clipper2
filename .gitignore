@@ -12,3 +12,4 @@
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
+.vscode/c_cpp_properties.json
