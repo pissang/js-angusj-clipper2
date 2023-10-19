@@ -1,7 +1,3 @@
-import { NativePolyNode } from "./NativePolyNode";
+import { NativePolyPath } from "./NativePolyPath";
 
-export interface NativePolyTree extends NativePolyNode {
-  clear(): void;
-  getFirst(): NativePolyNode;
-  total(): number;
-}
+export type NativePolyTree = NativePolyPath;

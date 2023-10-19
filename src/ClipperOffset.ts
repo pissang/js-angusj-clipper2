@@ -214,7 +214,7 @@ export class ClipperOffset {
    * @return {Paths} - Solution paths
    */
   executeToPolyTree(delta: number): PolyTree {
-    const outNativePolyTree = new this._nativeLib.PolyTree();
+    const outNativePolyTree = new this._nativeLib.PolyPath();
     try {
       this._clipperOffset!.executePolyTree(outNativePolyTree, delta);
       return PolyTree.fromNativePolyTree(this._nativeLib, outNativePolyTree, true); // frees outNativePolyTree

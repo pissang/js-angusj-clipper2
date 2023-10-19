@@ -1,6 +1,6 @@
 import { NativeDeletable } from "./NativeDeletable";
 
-export interface NativeIntPoint extends NativeDeletable {
+export interface NativePoint extends NativeDeletable {
   x: number;
   y: number;
 }

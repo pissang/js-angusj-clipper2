@@ -3,15 +3,14 @@ import { NativeClipperOffset } from "./NativeClipperOffset";
 import {
   NativeClipType,
   NativeEndType,
-  NativeInitOptions,
   NativeJoinType,
-  NativePolyFillType,
-  NativePolyType,
+  NativeFillRule,
 } from "./nativeEnums";
-import { NativeIntPoint } from "./NativeIntPoint";
+import { NativePoint } from "./NativePoint";
 import { NativePath } from "./NativePath";
 import { NativePaths } from "./NativePaths";
 import { NativePolyTree } from "./NativePolyTree";
+import { NativePolyPath } from "./NativePolyPath";
 
 export interface NativeClipperLibInstance {
   // custom conversion functions
@@ -31,54 +30,39 @@ export interface NativeClipperLibInstance {
   Path: new () => NativePath;
   Paths: new () => NativePaths;
   PolyTree: new () => NativePolyTree;
-  Clipper: new (initOptions: number) => NativeClipper;
-  ClipperOffset: new (miterLimit: number, arcTolerance: number) => NativeClipperOffset;
+  PolyPath: new () => NativePolyPath;
+
+  Clipper: new () => NativeClipper;
+  ClipperOffset: new () => NativeClipperOffset;
 
   // functions
-  newIntPoint(x: number, y: number): NativeIntPoint;
+  // newIntPoint(x: number, y: number): NativeIntPoint;
 
   orientation(path: NativePath): boolean;
   area(path: NativePath): number;
-  pointInPolygon(pt: NativeIntPoint, path: NativePath): number;
+  pointInPolygon(pt: NativePoint, path: NativePath): number;
 
-  simplifyPolygon(path: NativePath, outPaths: NativePaths, fillType: NativePolyFillType): void;
-  simplifyPolygonsInOut(
-    paths: NativePaths,
-    outPaths: NativePaths,
-    fillType: NativePolyFillType
-  ): void;
-  simplifyPolygonsOverwrite(paths: NativePaths, fillType: NativePolyFillType): void;
-
-  cleanPolygon(path: NativePath, outPath: NativePath, distance: number): void;
-  cleanPolygon(inOutPath: NativePath, distance: number): void;
-  cleanPolygons(paths: NativePaths, outPaths: NativePaths, distance: number): void;
-  cleanPolygons(inOutPaths: NativePaths, distance: number): void;
+  simplifyPath(path: NativePath, epsilon: number, isClosedPath: boolean): NativePath;
+  simplifyPaths(paths: NativePaths, epsilon: number, isClosedPath: boolean): NativePath;
 
   minkowskiSumPath(
     pattern: NativePath,
     path: NativePath,
-    outPaths: NativePaths,
-    pathIsClosed: boolean
-  ): void;
-  minkowskiSumPaths(
+    isClosed: boolean
+  ): NativePath;
+  minkowskiDiff(
     pattern: NativePath,
-    paths: NativePaths,
-    outPaths: NativePaths,
-    pathIsClosed: boolean
-  ): void;
-  minkowskiDiff(path1: NativePath, path2: NativePath, outPaths: NativePaths): void;
+    path: NativePath,
+    isClosed: boolean
+  ): NativePath;
 
-  polyTreeToPaths(polyTree: NativePolyTree, outPaths: NativePaths): void;
-  closedPathsFromPolyTree(polyTree: NativePolyTree, outPaths: NativePaths): void;
-  openPathsFromPolyTree(polyTree: NativePolyTree, outPaths: NativePaths): void;
+  polyTreeToPaths(polyTree: NativePolyTree): NativePaths;
 
-  reversePath(inOutPath: NativePath): void;
-  reversePaths(inOutPaths: NativePaths): void;
+  // reversePath(inOutPath: NativePath): void;
+  // reversePaths(inOutPaths: NativePaths): void;
 
   ClipType: NativeClipType;
-  PolyType: NativePolyType;
-  PolyFillType: NativePolyFillType;
-  InitOptions: NativeInitOptions;
+  FilLRule: NativeFillRule;
   JoinType: NativeJoinType;
   EndType: NativeEndType;
 }

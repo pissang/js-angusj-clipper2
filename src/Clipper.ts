@@ -354,7 +354,7 @@ export class Clipper {
     subjFillType: PolyFillType,
     clipFillType: PolyFillType
   ): PolyTree | undefined {
-    const outNativePolyTree = new this._nativeLib.PolyTree();
+    const outNativePolyTree = new this._nativeLib.PolyPath();
     try {
       const success = this._clipper!.executePolyTreeWithFillTypes(
         clipTypeToNative(this._nativeLib, clipType),

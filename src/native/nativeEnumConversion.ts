@@ -14,13 +14,13 @@ export function polyFillTypeToNative(
 ): NativePolyFillType {
   switch (polyFillType) {
     case PolyFillType.EvenOdd:
-      return nativeLib.PolyFillType.EvenOdd;
+      return nativeLib.FilLRule.EvenOdd;
     case PolyFillType.NonZero:
-      return nativeLib.PolyFillType.NonZero;
+      return nativeLib.FilLRule.NonZero;
     case PolyFillType.Positive:
-      return nativeLib.PolyFillType.Positive;
+      return nativeLib.FilLRule.Positive;
     case PolyFillType.Negative:
-      return nativeLib.PolyFillType.Negative;
+      return nativeLib.FilLRule.Negative;
     default:
       throw new Error("unknown poly fill type");
   }

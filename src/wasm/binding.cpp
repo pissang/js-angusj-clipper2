@@ -132,6 +132,7 @@ EMSCRIPTEN_BINDINGS(Clipper2Lib) {
   function("fromPaths", &JS_FromPaths);
 
   enum_<ClipType>("ClipType")
+    .value("None", ClipType::None)
     .value("Intersection", ClipType::Intersection)
     .value("Union", ClipType::Union)
     .value("Difference", ClipType::Difference)
@@ -184,7 +185,7 @@ EMSCRIPTEN_BINDINGS(Clipper2Lib) {
     .function("area", &PolyPath64::Area)
     .function("count", &PolyPath64::Count)
     .function("isHole", &PolyPath64::IsHole)
-    .function("getParent", &PolyPath64::JS_GetParent, allow_raw_pointers())
+    .function("parent", &PolyPath64::JS_GetParent, allow_raw_pointers())
     .function("child", &PolyPath64::Child, allow_raw_pointers());
     // .function("getChilds", &PolyPath64::JS_GetChilds, allow_raw_pointers());
 
@@ -214,7 +215,6 @@ EMSCRIPTEN_BINDINGS(Clipper2Lib) {
     // .property("bottom", &Rect64::JS_GetBottom, &Rect64::JS_SetBottom);
 
   class_<Clipper64>("Clipper")
-    .constructor<>()
     .function("clear", &ClipperBase::Clear)
     // .function("getBounds", &ClipperBase::GetBounds)
     .property("preserveCollinear",

@@ -1,31 +1,38 @@
-import { NativeClipperBase } from "./NativeClipperBase";
-import { NativeClipType, NativePolyFillType } from "./nativeEnums";
+import { NativeClipType, NativeFillRule } from "./nativeEnums";
 import { NativePaths } from "./NativePaths";
 import { NativePolyTree } from "./NativePolyTree";
 
-export interface NativeClipper extends NativeClipperBase {
+export interface NativeClipper {
+
+  reverseSolution: boolean;
+  preserveCollinear: boolean
+  clear(): void
+
+  addSubject(paths: NativePaths): void;
+  AddOpenSubject(paths: NativePaths): void;
+  addClip(paths: NativePaths): void;
+
   executePaths(
     clipType: NativeClipType,
-    outPaths: NativePaths,
-    polyFillType: NativePolyFillType
+    fillRule: NativeFillRule,
+    resultClosedPaths: NativePaths
   ): boolean;
-  executePathsWithFillTypes(
+  executePathsOpen(
     clipType: NativeClipType,
-    outPaths: NativePaths,
-    subjPolyFillType: NativePolyFillType,
-    clipPolyFillType: NativePolyFillType
+    fillRule: NativeFillRule,
+    resultClosedPaths: NativePaths,
+    resultOpenPaths: NativePaths
   ): boolean;
+
   executePolyTree(
     clipType: NativeClipType,
-    outPolyTree: NativePolyTree,
-    polyFillType: NativePolyFillType
+    fillRule: NativeFillRule,
+    resultPolyTree: NativePolyTree
   ): boolean;
-  executePolyTreeWithFillTypes(
+  executePolyTreeOpen(
     clipType: NativeClipType,
-    outPolyTree: NativePolyTree,
-    subjPolyFillType: NativePolyFillType,
-    clipPolyFillType: NativePolyFillType
+    fillRule: NativeFillRule,
+    resultPolyTree: NativePolyTree,
+    resultOpenPaths: NativePaths
   ): boolean;
-  reverseSolution: boolean;
-  strictlySimple: boolean;
 }

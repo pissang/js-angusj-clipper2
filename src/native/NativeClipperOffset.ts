@@ -5,11 +5,14 @@ import { NativePaths } from "./NativePaths";
 import { NativePolyTree } from "./NativePolyTree";
 
 export interface NativeClipperOffset extends NativeDeletable {
-  addPath(outPath: NativePath, joinType: NativeJoinType, endType: NativeEndType): void;
-  addPaths(outPaths: NativePaths, joinType: NativeJoinType, endType: NativeEndType): void;
-  executePaths(outPaths: NativePaths, delta: number): void;
-  executePolyTree(outPolyTree: NativePolyTree, delta: number): void;
+  addPath(path: NativePath, joinType: NativeJoinType, endType: NativeEndType): void;
+  addPaths(paths: NativePaths, joinType: NativeJoinType, endType: NativeEndType): void;
+  executePaths(delta: number, resultPaths: NativePaths): void;
+  executePolyTree(delta: number, resultPolyTree: NativePolyTree): void;
   clear(): void;
+
   miterLimit: number;
   arcTolerance: number;
+  preserveCollinear: boolean;
+  reverseSolution: boolean;
 }

@@ -4,6 +4,7 @@ export interface NativeEnum {
 
 // native enum
 export interface NativeClipType {
+  None: NativeEnum & NativeClipType;
   Intersection: NativeEnum & NativeClipType;
   Union: NativeEnum & NativeClipType;
   Difference: NativeEnum & NativeClipType;
@@ -11,24 +12,11 @@ export interface NativeClipType {
 }
 
 // native enum
-export interface NativePolyType {
-  Subject: NativeEnum & NativePolyType;
-  Clip: NativeEnum & NativePolyType;
-}
-
-// native enum
-export interface NativePolyFillType {
-  EvenOdd: NativeEnum & NativePolyFillType;
-  NonZero: NativeEnum & NativePolyFillType;
-  Positive: NativeEnum & NativePolyFillType;
-  Negative: NativeEnum & NativePolyFillType;
-}
-
-// native enum
-export interface NativeInitOptions {
-  ReverseSolution: NativeEnum & NativeInitOptions;
-  StrictlySimple: NativeEnum & NativeInitOptions;
-  PreserveCollinear: NativeEnum & NativeInitOptions;
+export interface NativeFillRule {
+  EvenOdd: NativeEnum & NativeFillRule;
+  NonZero: NativeEnum & NativeFillRule;
+  Positive: NativeEnum & NativeFillRule;
+  Negative: NativeEnum & NativeFillRule;
 }
 
 // native enum
@@ -40,9 +28,9 @@ export interface NativeJoinType {
 
 // native enum
 export interface NativeEndType {
-  ClosedPolygon: NativeEnum & NativeEndType;
-  ClosedLine: NativeEnum & NativeEndType;
-  OpenButt: NativeEnum & NativeEndType;
-  OpenSquare: NativeEnum & NativeEndType;
-  OpenRound: NativeEnum & NativeEndType;
+  Butt: NativeEnum & NativeEndType;
+  Joined: NativeEnum & NativeEndType;
+  Polygon: NativeEnum & NativeEndType;
+  Round: NativeEnum & NativeEndType;
+  Square: NativeEnum & NativeEndType;
 }

@@ -1,5 +1,5 @@
 import { NativeClipperLibInstance } from "./native/NativeClipperLibInstance";
-import { NativePolyNode } from "./native/NativePolyNode";
+import { NativePolyPath } from "./native/NativePolyPath";
 import { nativePathToPath } from "./native/PathToNativePath";
 import { ReadonlyPath } from "./Path";
 
@@ -107,7 +107,7 @@ export class PolyNode {
   protected static fillFromNativePolyNode(
     pn: PolyNode,
     nativeLib: NativeClipperLibInstance,
-    nativePolyNode: NativePolyNode,
+    nativePolyNode: NativePolyPath,
     parent: PolyNode | undefined,
     childIndex: number,
     freeNativePolyNode: boolean
@@ -141,7 +141,7 @@ export class PolyNode {
 
   protected static fromNativePolyNode(
     nativeLib: NativeClipperLibInstance,
-    nativePolyNode: NativePolyNode,
+    nativePolyNode: NativePolyPath,
     parent: PolyNode | undefined,
     childIndex: number,
     freeNativePolyNode: boolean
