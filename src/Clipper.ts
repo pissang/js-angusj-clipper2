@@ -79,77 +79,14 @@ export class Clipper {
   }
 
   /**
-   * Terminology:
-   * - A simple polygon is one that does not self-intersect.
-   * - A weakly simple polygon is a simple polygon that contains 'touching' vertices, or 'touching' edges.
-   * - A strictly simple polygon is a simple polygon that does not contain 'touching' vertices, or 'touching' edges.
-   *
-   * Vertices 'touch' if they share the same coordinates (and are not adjacent). An edge touches another if one of its end vertices touches another edge
-   * excluding its adjacent edges, or if they are co-linear and overlapping (including adjacent edges).
-   *
-   * Polygons returned by clipping operations (see Clipper.execute()) should always be simple polygons. When the StrictlySimply property is enabled,
-   * polygons returned will be strictly simple, otherwise they may be weakly simple. It's computationally expensive ensuring polygons are strictly simple
-   * and so this property is disabled by default.
-   *
-   * Note: There's currently no guarantee that polygons will be strictly simple since 'simplifying' is still a work in progress.
-   *
-   * @return {boolean} - true if set, false otherwise
-   */
-  get strictlySimple(): boolean {
-    return this._clipper!.strictlySimple;
-  }
-
-  /**
-   * Terminology:
-   * - A simple polygon is one that does not self-intersect.
-   * - A weakly simple polygon is a simple polygon that contains 'touching' vertices, or 'touching' edges.
-   * - A strictly simple polygon is a simple polygon that does not contain 'touching' vertices, or 'touching' edges.
-   *
-   * Vertices 'touch' if they share the same coordinates (and are not adjacent). An edge touches another if one of its end vertices touches another edge
-   * excluding its adjacent edges, or if they are co-linear and overlapping (including adjacent edges).
-   *
-   * Polygons returned by clipping operations (see Clipper.execute()) should always be simple polygons. When the StrictlySimply property is enabled,
-   * polygons returned will be strictly simple, otherwise they may be weakly simple. It's computationally expensive ensuring polygons are strictly simple
-   * and so this property is disabled by default.
-   *
-   * Note: There's currently no guarantee that polygons will be strictly simple since 'simplifying' is still a work in progress.
-   *
-   * @param value - value to set
-   */
-  set strictlySimple(value: boolean) {
-    this._clipper!.strictlySimple = value;
-  }
-
-  /**
    * The Clipper constructor creates an instance of the Clipper class. One or more InitOptions may be passed as a parameter to set the corresponding properties.
    * (These properties can still be set or reset after construction.)
    *
    * @param _nativeLib
    * @param initOptions
    */
-  constructor(
-    private readonly _nativeLib: NativeClipperLibInstance,
-    initOptions: ClipperInitOptions = {}
-  ) {
-    const realInitOptions = {
-      reverseSolutions: false,
-      strictlySimple: false,
-      preserveCollinear: false,
-      ...initOptions,
-    };
-
-    let nativeInitOptions = 0;
-    if (realInitOptions.reverseSolutions) {
-      nativeInitOptions += _nativeLib.InitOptions.ReverseSolution.value;
-    }
-    if (realInitOptions.strictlySimple) {
-      nativeInitOptions += _nativeLib.InitOptions.StrictlySimple.value;
-    }
-    if (realInitOptions.preserveCollinear) {
-      nativeInitOptions += _nativeLib.InitOptions.PreserveCollinear.value;
-    }
-
-    this._clipper = new _nativeLib.Clipper(nativeInitOptions);
+  constructor(private readonly _nativeLib: NativeClipperLibInstance) {
+    this._clipper = new _nativeLib.Clipper();
     nativeFinalizationRegistry?.register(this, this._clipper, this);
   }
 

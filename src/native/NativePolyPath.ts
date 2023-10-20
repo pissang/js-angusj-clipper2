@@ -1,6 +1,5 @@
 import { NativeDeletable } from "./NativeDeletable";
 import { NativePath } from "./NativePath";
-import { NativeVector } from "./NativeVector";
 
 export interface NativePolyPath extends NativeDeletable {
   polygon(): NativePath;

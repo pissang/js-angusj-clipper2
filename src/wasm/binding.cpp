@@ -142,8 +142,7 @@ EMSCRIPTEN_BINDINGS(Clipper2Lib) {
     .value("EvenOdd", FillRule::EvenOdd)
     .value("NonZero", FillRule::NonZero)
     .value("Positive", FillRule::Positive)
-    .value("Negative", FillRule::Negative)
-    ;
+    .value("Negative", FillRule::Negative);
 
   class_<Point64>("Point")
     .property("x", &Point64::JS_GetX, &Point64::JS_SetX)
@@ -205,18 +204,19 @@ EMSCRIPTEN_BINDINGS(Clipper2Lib) {
   function("minkowskiDiff", select_overload<Paths64(const Path64&, const Path64&, bool)>(&MinkowskiDiff));
 
   function("polyTreeToPaths", &PolyTreeToPaths64);
+  function("getPathBounds", select_overload<Rect64(const Path64&)>(&GetBounds));
+  function("getPathsBounds", select_overload<Rect64(const Paths64&)>(&GetBounds));
 
   // TODO
-  // class_<Rect64>("Rect")
+  class_<Rect64>("Rect")
     // .constructor<int64_t, int64_t, int64_t, int64_t>()
-    // .property("left", &Rect64::JS_GetLeft, &Rect64::JS_SetLeft);
-    // .property("top", &Rect64::JS_GetTop, &Rect64::JS_SetTop)
-    // .property("right", &Rect64::JS_GetRight, &Rect64::JS_SetRight)
-    // .property("bottom", &Rect64::JS_GetBottom, &Rect64::JS_SetBottom);
+    .property("left", &Rect64::JS_GetLeft, &Rect64::JS_SetLeft)
+    .property("top", &Rect64::JS_GetTop, &Rect64::JS_SetTop)
+    .property("right", &Rect64::JS_GetRight, &Rect64::JS_SetRight)
+    .property("bottom", &Rect64::JS_GetBottom, &Rect64::JS_SetBottom);
 
   class_<Clipper64>("Clipper")
     .function("clear", &ClipperBase::Clear)
-    // .function("getBounds", &ClipperBase::GetBounds)
     .property("preserveCollinear",
       &ClipperBase::JS_GetPreserveCollinear,
       &ClipperBase::JS_SetPreserveCollinear

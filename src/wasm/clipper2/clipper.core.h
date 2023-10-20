@@ -94,9 +94,9 @@ namespace Clipper2Lib
     T y;
 
   void JS_SetX(T x) { this->x = (T)x; };
-  T JS_GetX() const { return (T)this->x; };
+  double JS_GetX() const { return (double)this->x; };
   void JS_SetY(T y) { this->y = (T)y; };
-  T JS_GetY() const { return (T)this->y; };
+  double JS_GetY() const { return (double)this->y; };
 
 #ifdef USINGZ
     int64_t z;
@@ -270,14 +270,14 @@ namespace Clipper2Lib
         right = bottom = -(std::numeric_limits<int64_t>::max)();
       }
     }
-
-    T JS_GetLeft() {return (T)left;};
+    // IMPORTANT getter must be const
+    double JS_GetLeft() const {return (double)left;};
     void JS_SetLeft(T left) {this->left = (T)left;};
-    T JS_GetTop() {return (T)top;};
+    double JS_GetTop() const {return (double)top;};
     void JS_SetTop(T top) {this->top = (T)top;};
-    T JS_GetRight() {return (T)right;};
+    double JS_GetRight() const {return (double)right;};
     void JS_SetRight(T right) {this->right = (T)right;};
-    T JS_GetBottom() {return (T)bottom;};
+    double JS_GetBottom() const {return (double)bottom;};
     void JS_SetBottom(T bottom) {this->bottom = (T)bottom;};
 
     T Width() const { return right - left; }
