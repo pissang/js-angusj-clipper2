@@ -1,6 +1,6 @@
 import { NativeClipperLibInstance } from "./native/NativeClipperLibInstance";
 import { NativePolyTree } from "./native/NativePolyTree";
-import { PolyPath } from "./PolyNode";
+import { PolyPath } from "./PolyPath";
 
 /**
  * PolyTree is intended as a read-only data structure that should only be used to receive solutions from clipping and offsetting operations. It's an
@@ -18,14 +18,8 @@ import { PolyPath } from "./PolyNode";
  * open and closed paths from a polytree - openPathsFromPolyTree and closedPathsFromPolyTree.
  */
 export class PolyTree extends PolyPath {
-  protected _total = 0;
-
-  /**
-   * Returns the total number of PolyNodes (polygons) contained within the PolyTree. This value is not to be confused with childs.length which returns the
-   * number of immediate children only (Childs) contained by PolyTree.
-   */
-  get total(): number {
-    return this._total;
+  protected constructor() {
+    super(false);
   }
 
   /**
@@ -41,10 +35,6 @@ export class PolyTree extends PolyPath {
     }
   }
 
-  protected constructor() {
-    super();
-  }
-
   /**
    * Internal use.
    * Constructs a PolyTree from a native PolyTree.
@@ -55,9 +45,7 @@ export class PolyTree extends PolyPath {
     freeNativePolyTree: boolean
   ): PolyTree {
     const pt = new PolyTree();
-    PolyPath.fillFromNativePolyNode(pt, nativeLib, nativePolyTree, undefined, 0, false); // do NOT free them, they are freed on destruction of the polytree
-
-    pt._total = nativePolyTree.total();
+    PolyPath.fillFromNativePolyPath(pt, nativeLib, nativePolyTree, undefined, 0, false); // do NOT free them, they are freed on destruction of the polytree
 
     if (freeNativePolyTree) {
       nativePolyTree.delete(); // this deletes all inner paths, contours etc

@@ -7,8 +7,9 @@ import { nativePathsToPaths, pathsToNativePaths } from "./native/PathsToNativePa
 import { nativePathToPath, pathToNativePath } from "./native/PathToNativePath";
 import { Path, ReadonlyPath } from "./Path";
 import { Paths, ReadonlyPaths } from "./Paths";
-import { PolyPath } from "./PolyNode";
+import { PolyPath } from "./PolyPath";
 import { PolyTree } from "./PolyTree";
+import { NativePath } from "./native/NativePath";
 
 function tryDelete(...objs: NativeDeletable[]) {
   for (const obj of objs) {
@@ -32,41 +33,13 @@ export function area(path: ReadonlyPath): number {
   return -a * 0.5;
 }
 
-export function cleanPolygon(
-  nativeLib: NativeClipperLibInstance,
-  path: ReadonlyPath,
-  distance = 1.1415
-): Path {
-  const nativePath = pathToNativePath(nativeLib, path);
-  try {
-    nativeLib.cleanPolygon(nativePath, distance);
-    return nativePathToPath(nativeLib, nativePath, true); // frees nativePath
-  } finally {
-    tryDelete(nativePath);
-  }
-}
-
-export function cleanPolygons(
-  nativeLib: NativeClipperLibInstance,
-  paths: ReadonlyPaths,
-  distance = 1.1415
-): Paths {
-  const nativePaths = pathsToNativePaths(nativeLib, paths);
-  try {
-    nativeLib.cleanPolygons(nativePaths, distance);
-    return nativePathsToPaths(nativeLib, nativePaths, true); // frees nativePath
-  } finally {
-    tryDelete(nativePaths);
-  }
-}
-
 const enum NodeType {
   Any,
   Open,
   Closed,
 }
 
-function addPolyNodeToPaths(polynode: PolyPath, nt: NodeType, paths: ReadonlyPath[]): void {
+function addPolyPathToPaths(polynode: PolyPath, nt: NodeType, paths: ReadonlyPath[]): void {
   let match = true;
   switch (nt) {
     case NodeType.Open:
@@ -83,34 +56,35 @@ function addPolyNodeToPaths(polynode: PolyPath, nt: NodeType, paths: ReadonlyPat
   }
   for (let ii = 0, max = polynode.childs.length; ii < max; ii++) {
     const pn = polynode.childs[ii];
-    addPolyNodeToPaths(pn, nt, paths);
+    addPolyPathToPaths(pn, nt, paths);
   }
 }
 
 export function closedPathsFromPolyTree(polyTree: PolyTree): Paths {
   // we do this in JS since copying path is more expensive than just doing it
-
   const result: Paths = [];
   // result.Capacity = polytree.Total;
-  addPolyNodeToPaths(polyTree, NodeType.Closed, result);
+  addPolyPathToPaths(polyTree, NodeType.Closed, result);
   return result;
 }
 
 export function minkowskiDiff(
   nativeLib: NativeClipperLibInstance,
   poly1: ReadonlyPath,
-  poly2: ReadonlyPath
-): Paths {
+  poly2: ReadonlyPath,
+  isClosed?: boolean
+): Path {
   const nativePath1 = pathToNativePath(nativeLib, poly1);
   const nativePath2 = pathToNativePath(nativeLib, poly2);
-  const outNativePaths = new nativeLib.Paths();
 
+  let outNativePath;
   try {
-    nativeLib.minkowskiDiff(nativePath1, nativePath2, outNativePaths);
+    outNativePath = nativeLib.minkowskiDiff(nativePath1, nativePath2, isClosed ?? true);
     tryDelete(nativePath1, nativePath2);
-    return nativePathsToPaths(nativeLib, outNativePaths, true); // frees outNativePaths
+    return nativePathToPath(nativeLib, outNativePath, true); // frees outNativePath
   } finally {
-    tryDelete(nativePath1, nativePath2, outNativePaths);
+    tryDelete(nativePath1, nativePath2);
+    if (outNativePath) tryDelete(outNativePath);
   }
 }
 
@@ -145,28 +119,12 @@ export function minkowskiSumPaths(
   const nativePaths = pathsToNativePaths(nativeLib, paths);
 
   try {
-    nativeLib.minkowskiSumPaths(patternNativePath, nativePaths, nativePaths, pathIsClosed);
+    nativeLib.minkowskiSumPath(patternNativePath, nativePaths, nativePaths, pathIsClosed);
     tryDelete(patternNativePath);
     return nativePathsToPaths(nativeLib, nativePaths, true); // frees nativePaths
   } finally {
     tryDelete(patternNativePath, nativePaths);
   }
-}
-
-export function openPathsFromPolyTree(polyTree: PolyTree): ReadonlyPath[] {
-  // we do this in JS since copying path is more expensive than just doing it
-
-  const result = [];
-  const len = polyTree.childs.length;
-  result.length = len;
-  let resultLength = 0;
-  for (let i = 0; i < len; i++) {
-    if (polyTree.childs[i].isOpen) {
-      result[resultLength++] = polyTree.childs[i].polygon;
-    }
-  }
-  result.length = resultLength;
-  return result;
 }
 
 export function orientation(path: ReadonlyPath): boolean {
@@ -230,7 +188,7 @@ export function polyTreeToPaths(polyTree: PolyTree): Paths {
 
   const result: Paths = [];
   // result.Capacity = polytree.total;
-  addPolyNodeToPaths(polyTree, NodeType.Any, result);
+  addPolyPathToPaths(polyTree, NodeType.Any, result);
   return result;
 }
 
@@ -249,35 +207,28 @@ export function reversePaths(paths: Paths): void {
 export function simplifyPolygon(
   nativeLib: NativeClipperLibInstance,
   path: ReadonlyPath,
-  fillType: PolyFillRule = PolyFillRule.EvenOdd
-): Paths {
+  epsilon = 1,
+  isClosed = true
+) {
   const nativePath = pathToNativePath(nativeLib, path);
-  const outNativePaths = new nativeLib.Paths();
+  let outNativePath: NativePath | undefined;
   try {
-    nativeLib.simplifyPolygon(
+    outNativePath = nativeLib.simplifyPath(
       nativePath,
-      outNativePaths,
-      polyFillRuleToNative(nativeLib, fillType)
+      epsilon,
+      isClosed
     );
     tryDelete(nativePath);
-    return nativePathsToPaths(nativeLib, outNativePaths, true); // frees outNativePaths
+    if (outNativePath) {
+      return nativePathToPath(nativeLib, outNativePath, true)
+    }
   } finally {
-    tryDelete(nativePath, outNativePaths);
+    if (outNativePath) {
+      tryDelete(outNativePath);
+    }
   }
-}
-
-export function simplifyPolygons(
-  nativeLib: NativeClipperLibInstance,
-  paths: ReadonlyPaths,
-  fillType: PolyFillRule = PolyFillRule.EvenOdd
-): Paths {
-  const nativePaths = pathsToNativePaths(nativeLib, paths);
-  try {
-    nativeLib.simplifyPolygonsOverwrite(nativePaths, polyFillRuleToNative(nativeLib, fillType));
-    return nativePathsToPaths(nativeLib, nativePaths, true); // frees nativePaths
-  } finally {
-    tryDelete(nativePaths);
-  }
+  // TODO nothing
+  return path;
 }
 
 export function scalePath(path: ReadonlyPath, scale: number): Path {

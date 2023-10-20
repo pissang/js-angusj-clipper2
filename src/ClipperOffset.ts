@@ -128,7 +128,9 @@ export class ClipperOffset {
     miterLimit = 2,
     arcTolerance = 0.25
   ) {
-    this._clipperOffset = new _nativeLib.ClipperOffset(miterLimit, arcTolerance);
+    const clipperOffset = this._clipperOffset = new _nativeLib.ClipperOffset();
+    clipperOffset.miterLimit = miterLimit;
+    clipperOffset.arcTolerance = arcTolerance;
     nativeFinalizationRegistry?.register(this, this._clipperOffset, this);
   }
 
@@ -186,16 +188,12 @@ export class ClipperOffset {
    * This method can be called multiple times, offsetting the same paths by different amounts (ie using different deltas).
    *
    * @param delta - Delta
-   * @param cleanDistance - Clean distance over the output, or undefined for no cleaning.
    * @return {Paths} - Solution paths
    */
-  executeToPaths(delta: number, cleanDistance: number | undefined): Paths {
+  executeToPaths(delta: number): Paths {
     const outNativePaths = new this._nativeLib.Paths();
     try {
-      this._clipperOffset!.executePaths(outNativePaths, delta);
-      if (cleanDistance !== undefined) {
-        this._nativeLib.cleanPolygons(outNativePaths, cleanDistance);
-      }
+      this._clipperOffset!.executeToPaths(delta, outNativePaths);
       return nativePathsToPaths(this._nativeLib, outNativePaths, true); // frees outNativePaths
     } finally {
       if (!outNativePaths.isDeleted()) {
@@ -216,7 +214,7 @@ export class ClipperOffset {
   executeToPolyTree(delta: number): PolyTree {
     const outNativePolyTree = new this._nativeLib.PolyPath();
     try {
-      this._clipperOffset!.executePolyTree(outNativePolyTree, delta);
+      this._clipperOffset!.executeToPolyTree(delta, outNativePolyTree);
       return PolyTree.fromNativePolyTree(this._nativeLib, outNativePolyTree, true); // frees outNativePolyTree
     } finally {
       if (!outNativePolyTree.isDeleted()) {

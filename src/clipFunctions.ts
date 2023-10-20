@@ -1,8 +1,7 @@
 import { Clipper } from "./Clipper";
 import { ClipperError } from "./ClipperError";
-import { ClipType, PolyFillRule, PolyType } from "./enums";
+import { ClipType, PolyFillRule } from "./enums";
 import { NativeClipperLibInstance } from "./native/NativeClipperLibInstance";
-import { Path, ReadonlyPath } from "./Path";
 import { Paths, ReadonlyPaths } from "./Paths";
 import { PolyTree } from "./PolyTree";
 
@@ -17,7 +16,7 @@ const devMode =
  */
 export interface SubjectInput {
   /**
-   * Path / Paths data.
+   * Paths data.
    *
    * Path Coordinate range:
    * Path coordinates must be between ± 9007199254740991, otherwise a range error will be thrown when attempting to add the path to the Clipper object.
@@ -29,7 +28,7 @@ export interface SubjectInput {
    * - it has 2 vertices but is not an open path
    * - the vertices are all co-linear and it is not an open path
    */
-  data: ReadonlyPath | ReadonlyPaths;
+  data: ReadonlyPaths;
 
   /**
    * If the path/paths is closed or not.
@@ -45,7 +44,7 @@ export interface SubjectInput {
  */
 export interface ClipInput {
   /**
-   * Path / Paths data.
+   * Paths data.
    *
    * Path Coordinate range:
    * Path coordinates must be between ± 9007199254740991, otherwise a range error will be thrown when attempting to add the path to the Clipper object.
@@ -57,7 +56,7 @@ export interface ClipInput {
    * - it has 2 vertices but is not an open path
    * - the vertices are all co-linear and it is not an open path
    */
-  data: ReadonlyPath | ReadonlyPaths;
+  data: ReadonlyPaths;
 }
 
 /**
@@ -78,19 +77,14 @@ export interface ClipParams {
   clipType: ClipType;
 
   /**
-   * Winding (fill) rule for subject polygons.
+   * Winding (fill) rule for polygons.
    */
-  subjectFillType: PolyFillRule;
+  fillRule: PolyFillRule;
 
   /**
    * Subject inputs.
    */
   subjectInputs: SubjectInput[];
-
-  /**
-   * Winding (fill) rule for clipping polygons. If missing it will use the same one as subjectFillType.
-   */
-  clipFillType?: PolyFillRule;
 
   /**
    * Clipping inputs. Not required for union operations, required for others.
@@ -104,71 +98,11 @@ export interface ClipParams {
   reverseSolution?: boolean;
 
   /**
-   * Terminology:
-   * - A simple polygon is one that does not self-intersect.
-   * - A weakly simple polygon is a simple polygon that contains 'touching' vertices, or 'touching' edges.
-   * - A strictly simple polygon is a simple polygon that does not contain 'touching' vertices, or 'touching' edges.
-   *
-   * Vertices 'touch' if they share the same coordinates (and are not adjacent). An edge touches another if one of its end vertices touches another edge
-   * excluding its adjacent edges, or if they are co-linear and overlapping (including adjacent edges).
-   *
-   * Polygons returned by clipping operations (see Clipper.execute()) should always be simple polygons. When the StrictlySimply property is enabled,
-   * polygons returned will be strictly simple, otherwise they may be weakly simple. It's computationally expensive ensuring polygons are strictly simple
-   * and so this property is disabled by default.
-   *
-   * Note: There's currently no guarantee that polygons will be strictly simple since 'simplifying' is still a work in progress.
-   */
-  strictlySimple?: boolean;
-
-  /**
    * By default, when three or more vertices are collinear in input polygons (subject or clip), the Clipper object removes the 'inner' vertices before
    * clipping. When enabled the preserveCollinear property prevents this default behavior to allow these inner vertices to appear in the solution.
    */
   preserveCollinear?: boolean;
-
-  /**
-   * If this is not undefined then cleaning of the result polygon will be performed.
-   * This operation is only available when the output format is not a poly tree.
-   */
-  cleanDistance?: number;
 }
-
-const addPathOrPaths = (
-  clipper: Clipper,
-  inputDatas: (SubjectInput | ClipInput)[] | undefined,
-  polyType: PolyType
-) => {
-  if (inputDatas === undefined) {
-    return;
-  }
-
-  // add each input
-  for (let i = 0, maxi = inputDatas.length; i < maxi; i++) {
-    const inputData = inputDatas[i];
-
-    // add the path/paths
-    const pathOrPaths = inputData.data;
-    if (!pathOrPaths || pathOrPaths.length <= 0) {
-      continue;
-    }
-
-    const closed =
-      (inputData as SubjectInput).closed === undefined ? true : (inputData as SubjectInput).closed;
-
-    // is it a path or paths?
-    if (Array.isArray(pathOrPaths[0])) {
-      // paths
-      if (!clipper.addPaths(pathOrPaths as Paths, polyType, closed)) {
-        throw new ClipperError("invalid paths");
-      }
-    } else {
-      // path
-      if (!clipper.addPath(pathOrPaths as Path, polyType, closed)) {
-        throw new ClipperError("invalid path");
-      }
-    }
-  }
-};
 
 export function clipToPathsOrPolyTree(
   polyTreeMode: boolean,
@@ -181,27 +115,37 @@ export function clipToPathsOrPolyTree(
     }
   }
 
-  const clipper = new Clipper(nativeClipperLib, params);
+  const clipper = new Clipper(nativeClipperLib);
+  if (params.preserveCollinear != null) {
+    clipper.preserveCollinear = params.preserveCollinear;
+  }
+  if (params.reverseSolution != null) {
+    clipper.reverseSolution = params.reverseSolution;
+  }
 
   //noinspection UnusedCatchParameterJS
   try {
-    addPathOrPaths(clipper, params.subjectInputs, PolyType.Subject);
-    addPathOrPaths(clipper, params.clipInputs, PolyType.Clip);
+    params.subjectInputs.forEach(subject => {
+      // TODO check validation.
+      clipper[subject.closed ? 'addSubject' : 'addOpenSubject'](
+        subject.data
+      );
+    });
+    params.clipInputs?.forEach(clip => {
+      // TODO check validation.
+      clipper.addClip(clip.data);
+    });
+
+
     let result;
-    const clipFillType =
-      params.clipFillType === undefined ? params.subjectFillType : params.clipFillType;
     if (!polyTreeMode) {
+      // TODO executeToPathsOpen
       result = clipper.executeToPaths(
         params.clipType,
-        params.subjectFillType,
-        clipFillType,
-        params.cleanDistance
+        params.fillRule
       );
     } else {
-      if (params.cleanDistance !== undefined) {
-        throw new ClipperError("cleaning is not available for poly tree results");
-      }
-      result = clipper.executeToPolyTee(params.clipType, params.subjectFillType, clipFillType);
+      result = clipper.executeToPolyTee(params.clipType, params.fillRule);
     }
     if (result === undefined) {
       throw new ClipperError("error while performing clipping task");

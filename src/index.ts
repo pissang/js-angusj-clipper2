@@ -17,7 +17,7 @@ import { NativeClipperLibInstance } from "./native/NativeClipperLibInstance";
 import { OffsetInput, OffsetParams, offsetToPaths, offsetToPolyTree } from "./offsetFunctions";
 import { Path, ReadonlyPath } from "./Path";
 import { Paths, ReadonlyPaths } from "./Paths";
-import { PolyPath } from "./PolyNode";
+import { PolyPath } from "./PolyPath";
 import { PolyTree } from "./PolyTree";
 
 // export types
@@ -186,46 +186,6 @@ export class ClipperLibWrapper {
    */
   area(path: ReadonlyPath): number {
     return functions.area(path);
-  }
-
-  /**
-   * Removes vertices:
-   * - that join co-linear edges, or join edges that are almost co-linear (such that if the vertex was moved no more than the specified distance the edges
-   * would be co-linear)
-   * - that are within the specified distance of an adjacent vertex
-   * - that are within the specified distance of a semi-adjacent vertex together with their out-lying vertices
-   *
-   * Vertices are semi-adjacent when they are separated by a single (out-lying) vertex.
-   *
-   * The distance parameter's default value is approximately √2 so that a vertex will be removed when adjacent or semi-adjacent vertices having their
-   * corresponding X and Y coordinates differing by no more than 1 unit. (If the egdes are semi-adjacent the out-lying vertex will be removed too.)
-   *
-   * @param path - The path to clean
-   * @param distance - How close points need to be before they are cleaned
-   * @return {Path} - The cleaned path
-   */
-  cleanPolygon(path: ReadonlyPath, distance = 1.1415): Path {
-    return functions.cleanPolygon(this.instance, path, distance);
-  }
-
-  /**
-   * Removes vertices:
-   * - that join co-linear edges, or join edges that are almost co-linear (such that if the vertex was moved no more than the specified distance the edges
-   * would be co-linear)
-   * - that are within the specified distance of an adjacent vertex
-   * - that are within the specified distance of a semi-adjacent vertex together with their out-lying vertices
-   *
-   * Vertices are semi-adjacent when they are separated by a single (out-lying) vertex.
-   *
-   * The distance parameter's default value is approximately √2 so that a vertex will be removed when adjacent or semi-adjacent vertices having their
-   * corresponding X and Y coordinates differing by no more than 1 unit. (If the egdes are semi-adjacent the out-lying vertex will be removed too.)
-   *
-   * @param paths - The paths to clean
-   * @param distance - How close points need to be before they are cleaned
-   * @return {Paths} - The cleaned paths
-   */
-  cleanPolygons(paths: ReadonlyPaths, distance = 1.1415): Paths {
-    return functions.cleanPolygons(this.instance, paths, distance);
   }
 
   //noinspection JSMethodCanBeStatic
