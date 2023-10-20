@@ -3,89 +3,50 @@ import { NativePolyPath } from "./native/NativePolyPath";
 import { nativePathToPath } from "./native/PathToNativePath";
 import { ReadonlyPath } from "./Path";
 
-/**
- * PolyNodes are encapsulated within a PolyTree container, and together provide a data structure representing the parent-child relationships of polygon
- * contours returned by clipping/ofsetting methods.
- *
- * A PolyNode object represents a single polygon. It's isHole property indicates whether it's an outer or a hole. PolyNodes may own any number of PolyNode
- * children (childs), where children of outer polygons are holes, and children of holes are (nested) outer polygons.
- */
-export class PolyNode {
-  protected _parent?: PolyNode;
+export class PolyPath {
+  protected _parent?: PolyPath;
+  protected _isHole: boolean;
+  protected _index = 0;
+  protected _childs: PolyPath[] = [];
 
-  /**
-   * Returns the parent PolyNode.
-   *
-   * The PolyTree object (which is also a PolyNode) does not have a parent and will return undefined.
-   */
-  get parent(): PolyNode | undefined {
+  constructor(isHole: boolean) {
+    this._isHole = isHole;
+  }
+
+  get parent(): PolyPath | undefined {
     return this._parent;
   }
 
-  protected _childs: PolyNode[] = [];
-  /**
-   * A read-only list of PolyNode.
-   * Outer PolyNode childs contain hole PolyNodes, and hole PolyNode childs contain nested outer PolyNodes.
-   */
-  get childs(): PolyNode[] {
+  get childs(): PolyPath[] {
     return this._childs;
   }
 
-  protected _contour: ReadonlyPath = [];
-  /**
-   * Returns a path list which contains any number of vertices.
-   */
-  get contour(): ReadonlyPath {
-    return this._contour;
+  protected _polygon: ReadonlyPath = [];
+
+  get polygon(): ReadonlyPath {
+    return this._polygon;
   }
 
-  protected _isOpen = false;
-  /**
-   * Returns true when the PolyNode's Contour results from a clipping operation on an open contour (path). Only top-level PolyNodes can contain open contours.
-   */
-  get isOpen(): boolean {
-    return this._isOpen;
-  }
-
-  protected _index = 0;
-  /**
-   * Index in the parent's child list, or 0 if no parent.
-   */
   get index(): number {
     return this._index;
   }
 
-  protected _isHole?: boolean;
-  /**
-   * Returns true when the PolyNode's polygon (Contour) is a hole.
-   *
-   * Children of outer polygons are always holes, and children of holes are always (nested) outer polygons.
-   * The isHole property of a PolyTree object is undefined but its children are always top-level outer polygons.
-   *
-   * @return {boolean}
-   */
   get isHole(): boolean {
-    if (this._isHole === undefined) {
-      let result = true;
-      let node: PolyNode | undefined = this._parent;
-      while (node !== undefined) {
-        result = !result;
-        node = node._parent;
-      }
-      this._isHole = result;
-    }
-
     return this._isHole;
+    // if (this._isHole === undefined) {
+    //   let result = true;
+    //   let node: PolyPath | undefined = this._parent;
+    //   while (node !== undefined) {
+    //     result = !result;
+    //     node = node._parent;
+    //   }
+    //   this._isHole = result;
+    // }
+
+    // return this._isHole;
   }
 
-  /**
-   * The returned PolyNode will be the first child if any, otherwise the next sibling, otherwise the next sibling of the Parent etc.
-   *
-   * A PolyTree can be traversed very easily by calling GetFirst() followed by GetNext() in a loop until the returned object is undefined.
-   *
-   * @return {PolyNode | undefined}
-   */
-  getNext(): PolyNode | undefined {
+  getNext(): PolyPath | undefined {
     if (this._childs.length > 0) {
       return this._childs[0];
     } else {
@@ -93,7 +54,7 @@ export class PolyNode {
     }
   }
 
-  protected getNextSiblingUp(): PolyNode | undefined {
+  protected getNextSiblingUp(): PolyPath | undefined {
     if (this._parent === undefined) {
       return undefined;
     } else if (this._index === this._parent._childs.length - 1) {
@@ -104,56 +65,53 @@ export class PolyNode {
     }
   }
 
-  protected static fillFromNativePolyNode(
-    pn: PolyNode,
+  protected static fillFromNativePolyPath(
+    pn: PolyPath,
     nativeLib: NativeClipperLibInstance,
-    nativePolyNode: NativePolyPath,
-    parent: PolyNode | undefined,
+    nativePolyPath: NativePolyPath,
+    parent: PolyPath | undefined,
     childIndex: number,
-    freeNativePolyNode: boolean
+    freeNativePolyPath: boolean
   ): void {
     pn._parent = parent;
 
-    const childs = nativePolyNode.childs;
-    const max = childs.size();
-    pn._childs.length = max;
+    const max = nativePolyPath.count();
 
     for (let i = 0; i < max; i++) {
-      const newChild = PolyNode.fromNativePolyNode(
+      const newChild = PolyPath.fromNativePolyPath(
         nativeLib,
-        childs.get(i),
+        nativePolyPath.child(i),
         pn,
         i,
-        freeNativePolyNode
+        freeNativePolyPath
       );
-      pn._childs[i] = newChild;
+      pn._childs.push(newChild);
     }
 
     // do we need to clear the object ourselves? for now let's assume so (seems to work)
-    pn._contour = nativePathToPath(nativeLib, nativePolyNode.contour, true);
-    pn._isOpen = nativePolyNode.isOpen();
+    pn._polygon = nativePathToPath(nativeLib, nativePolyPath.polygon(), true);
     pn._index = childIndex;
 
-    if (freeNativePolyNode) {
-      nativePolyNode.delete();
+    if (freeNativePolyPath) {
+      nativePolyPath.delete();
     }
   }
 
-  protected static fromNativePolyNode(
+  protected static fromNativePolyPath(
     nativeLib: NativeClipperLibInstance,
-    nativePolyNode: NativePolyPath,
-    parent: PolyNode | undefined,
+    nativePolyPath: NativePolyPath,
+    parent: PolyPath | undefined,
     childIndex: number,
-    freeNativePolyNode: boolean
-  ): PolyNode {
-    const pn = new PolyNode();
-    PolyNode.fillFromNativePolyNode(
+    freeNativePolyPath: boolean
+  ): PolyPath {
+    const pn = new PolyPath(nativePolyPath.isHole());
+    PolyPath.fillFromNativePolyPath(
       pn,
       nativeLib,
-      nativePolyNode,
+      nativePolyPath,
       parent,
       childIndex,
-      freeNativePolyNode
+      freeNativePolyPath
     );
     return pn;
   }

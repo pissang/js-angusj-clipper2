@@ -1,6 +1,6 @@
 import { Clipper } from "./Clipper";
 import { ClipperError } from "./ClipperError";
-import { ClipType, PolyFillType, PolyType } from "./enums";
+import { ClipType, PolyFillRule, PolyType } from "./enums";
 import { NativeClipperLibInstance } from "./native/NativeClipperLibInstance";
 import { Path, ReadonlyPath } from "./Path";
 import { Paths, ReadonlyPaths } from "./Paths";
@@ -80,7 +80,7 @@ export interface ClipParams {
   /**
    * Winding (fill) rule for subject polygons.
    */
-  subjectFillType: PolyFillType;
+  subjectFillType: PolyFillRule;
 
   /**
    * Subject inputs.
@@ -90,7 +90,7 @@ export interface ClipParams {
   /**
    * Winding (fill) rule for clipping polygons. If missing it will use the same one as subjectFillType.
    */
-  clipFillType?: PolyFillType;
+  clipFillType?: PolyFillRule;
 
   /**
    * Clipping inputs. Not required for union operations, required for others.

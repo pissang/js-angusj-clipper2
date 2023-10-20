@@ -1,6 +1,6 @@
 import { NativeClipperLibInstance } from "./native/NativeClipperLibInstance";
 import { NativePolyTree } from "./native/NativePolyTree";
-import { PolyNode } from "./PolyNode";
+import { PolyPath } from "./PolyNode";
 
 /**
  * PolyTree is intended as a read-only data structure that should only be used to receive solutions from clipping and offsetting operations. It's an
@@ -17,7 +17,7 @@ import { PolyNode } from "./PolyNode";
  * PolyTrees can also contain open paths. Open paths will always be represented by top level PolyNodes. Two functions are provided to quickly separate out
  * open and closed paths from a polytree - openPathsFromPolyTree and closedPathsFromPolyTree.
  */
-export class PolyTree extends PolyNode {
+export class PolyTree extends PolyPath {
   protected _total = 0;
 
   /**
@@ -33,7 +33,7 @@ export class PolyTree extends PolyNode {
    *
    * This function is equivalent to calling childs[0].
    */
-  getFirst(): PolyNode | undefined {
+  getFirst(): PolyPath | undefined {
     if (this.childs.length > 0) {
       return this.childs[0];
     } else {
@@ -55,7 +55,7 @@ export class PolyTree extends PolyNode {
     freeNativePolyTree: boolean
   ): PolyTree {
     const pt = new PolyTree();
-    PolyNode.fillFromNativePolyNode(pt, nativeLib, nativePolyTree, undefined, 0, false); // do NOT free them, they are freed on destruction of the polytree
+    PolyPath.fillFromNativePolyNode(pt, nativeLib, nativePolyTree, undefined, 0, false); // do NOT free them, they are freed on destruction of the polytree
 
     pt._total = nativePolyTree.total();
 

@@ -1,4 +1,4 @@
-import { IntPoint } from "./IntPoint";
+import { Point } from "./Point";
 
-export type Path = IntPoint[];
-export type ReadonlyPath = ReadonlyArray<Readonly<IntPoint>>;
+export type Path = Point[];
+export type ReadonlyPath = ReadonlyArray<Readonly<Point>>;

@@ -7,8 +7,8 @@ import { NativePolyTree } from "./NativePolyTree";
 export interface NativeClipperOffset extends NativeDeletable {
   addPath(path: NativePath, joinType: NativeJoinType, endType: NativeEndType): void;
   addPaths(paths: NativePaths, joinType: NativeJoinType, endType: NativeEndType): void;
-  executePaths(delta: number, resultPaths: NativePaths): void;
-  executePolyTree(delta: number, resultPolyTree: NativePolyTree): void;
+  executeToPaths(delta: number, resultPaths: NativePaths): void;
+  executeToPolyTree(delta: number, resultPolyTree: NativePolyTree): void;
   clear(): void;
 
   miterLimit: number;

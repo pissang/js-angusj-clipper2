@@ -8,16 +8,16 @@ import {
   NativeClipperLibLoadedFormat,
   NativeClipperLibRequestedFormat,
   PointInPolygonResult,
-  PolyFillType,
+  PolyFillRule,
 } from "./enums";
 import * as functions from "./functions";
-import { IntPoint } from "./IntPoint";
-import { IntRect } from "./IntRect";
+import { Point } from "./Point";
+import { Rect } from "./Rect";
 import { NativeClipperLibInstance } from "./native/NativeClipperLibInstance";
 import { OffsetInput, OffsetParams, offsetToPaths, offsetToPolyTree } from "./offsetFunctions";
 import { Path, ReadonlyPath } from "./Path";
 import { Paths, ReadonlyPaths } from "./Paths";
-import { PolyNode } from "./PolyNode";
+import { PolyPath } from "./PolyNode";
 import { PolyTree } from "./PolyTree";
 
 // export types
@@ -25,14 +25,14 @@ export {
   ClipType,
   EndType,
   JoinType,
-  PolyFillType,
+  PolyFillRule as PolyFillType,
   NativeClipperLibLoadedFormat,
   NativeClipperLibRequestedFormat,
   PointInPolygonResult,
-  PolyNode,
+  PolyPath as PolyNode,
   PolyTree,
-  IntPoint,
-  IntRect,
+  Point as IntPoint,
+  Rect as IntRect,
   Path,
   ReadonlyPath,
   Paths,
@@ -325,7 +325,7 @@ export class ClipperLibWrapper {
    * @param path
    * @return {PointInPolygonResult}
    */
-  pointInPolygon(point: Readonly<IntPoint>, path: ReadonlyPath): PointInPolygonResult {
+  pointInPolygon(point: Readonly<Point>, path: ReadonlyPath): PointInPolygonResult {
     return functions.pointInPolygon(point, path);
   }
 
@@ -370,7 +370,7 @@ export class ClipperLibWrapper {
    * @param fillType
    * @return {Paths} - The solution
    */
-  simplifyPolygon(path: ReadonlyPath, fillType: PolyFillType = PolyFillType.EvenOdd): Paths {
+  simplifyPolygon(path: ReadonlyPath, fillType: PolyFillRule = PolyFillRule.EvenOdd): Paths {
     return functions.simplifyPolygon(this.instance, path, fillType);
   }
 
@@ -384,7 +384,7 @@ export class ClipperLibWrapper {
    * @param fillType
    * @return {Paths} - The solution
    */
-  simplifyPolygons(paths: ReadonlyPaths, fillType: PolyFillType = PolyFillType.EvenOdd): Paths {
+  simplifyPolygons(paths: ReadonlyPaths, fillType: PolyFillRule = PolyFillRule.EvenOdd): Paths {
     return functions.simplifyPolygons(this.instance, paths, fillType);
   }
 

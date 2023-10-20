@@ -1,25 +1,24 @@
-import { ClipType, EndType, JoinType, PolyFillType, PolyType } from "../enums";
+import { ClipType, EndType, JoinType, PolyFillRule, PolyType } from "../enums";
 import { NativeClipperLibInstance } from "./NativeClipperLibInstance";
 import {
   NativeClipType,
   NativeEndType,
+  NativeFillRule,
   NativeJoinType,
-  NativePolyFillType,
-  NativePolyType,
 } from "./nativeEnums";
 
-export function polyFillTypeToNative(
+export function polyFillRuleToNative(
   nativeLib: NativeClipperLibInstance,
-  polyFillType: PolyFillType
-): NativePolyFillType {
+  polyFillType: PolyFillRule
+): NativeFillRule {
   switch (polyFillType) {
-    case PolyFillType.EvenOdd:
+    case PolyFillRule.EvenOdd:
       return nativeLib.FilLRule.EvenOdd;
-    case PolyFillType.NonZero:
+    case PolyFillRule.NonZero:
       return nativeLib.FilLRule.NonZero;
-    case PolyFillType.Positive:
+    case PolyFillRule.Positive:
       return nativeLib.FilLRule.Positive;
-    case PolyFillType.Negative:
+    case PolyFillRule.Negative:
       return nativeLib.FilLRule.Negative;
     default:
       throw new Error("unknown poly fill type");

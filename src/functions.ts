@@ -1,13 +1,13 @@
-import { PointInPolygonResult, PolyFillType } from "./enums";
-import { IntPoint } from "./IntPoint";
+import { PointInPolygonResult, PolyFillRule } from "./enums";
+import { Point } from "./Point";
 import { NativeClipperLibInstance } from "./native/NativeClipperLibInstance";
 import { NativeDeletable } from "./native/NativeDeletable";
-import { polyFillTypeToNative } from "./native/nativeEnumConversion";
+import { polyFillRuleToNative } from "./native/nativeEnumConversion";
 import { nativePathsToPaths, pathsToNativePaths } from "./native/PathsToNativePaths";
 import { nativePathToPath, pathToNativePath } from "./native/PathToNativePath";
 import { Path, ReadonlyPath } from "./Path";
 import { Paths, ReadonlyPaths } from "./Paths";
-import { PolyNode } from "./PolyNode";
+import { PolyPath } from "./PolyNode";
 import { PolyTree } from "./PolyTree";
 
 function tryDelete(...objs: NativeDeletable[]) {
@@ -66,7 +66,7 @@ const enum NodeType {
   Closed,
 }
 
-function addPolyNodeToPaths(polynode: PolyNode, nt: NodeType, paths: ReadonlyPath[]): void {
+function addPolyNodeToPaths(polynode: PolyPath, nt: NodeType, paths: ReadonlyPath[]): void {
   let match = true;
   switch (nt) {
     case NodeType.Open:
@@ -78,8 +78,8 @@ function addPolyNodeToPaths(polynode: PolyNode, nt: NodeType, paths: ReadonlyPat
       break;
   }
 
-  if (polynode.contour.length > 0 && match) {
-    paths.push(polynode.contour);
+  if (polynode.polygon.length > 0 && match) {
+    paths.push(polynode.polygon);
   }
   for (let ii = 0, max = polynode.childs.length; ii < max; ii++) {
     const pn = polynode.childs[ii];
@@ -162,7 +162,7 @@ export function openPathsFromPolyTree(polyTree: PolyTree): ReadonlyPath[] {
   let resultLength = 0;
   for (let i = 0; i < len; i++) {
     if (polyTree.childs[i].isOpen) {
-      result[resultLength++] = polyTree.childs[i].contour;
+      result[resultLength++] = polyTree.childs[i].polygon;
     }
   }
   result.length = resultLength;
@@ -174,7 +174,7 @@ export function orientation(path: ReadonlyPath): boolean {
 }
 
 export function pointInPolygon(
-  point: Readonly<IntPoint>,
+  point: Readonly<Point>,
   path: ReadonlyPath
 ): PointInPolygonResult {
   // we do this in JS since copying path is more expensive than just doing it
@@ -249,7 +249,7 @@ export function reversePaths(paths: Paths): void {
 export function simplifyPolygon(
   nativeLib: NativeClipperLibInstance,
   path: ReadonlyPath,
-  fillType: PolyFillType = PolyFillType.EvenOdd
+  fillType: PolyFillRule = PolyFillRule.EvenOdd
 ): Paths {
   const nativePath = pathToNativePath(nativeLib, path);
   const outNativePaths = new nativeLib.Paths();
@@ -257,7 +257,7 @@ export function simplifyPolygon(
     nativeLib.simplifyPolygon(
       nativePath,
       outNativePaths,
-      polyFillTypeToNative(nativeLib, fillType)
+      polyFillRuleToNative(nativeLib, fillType)
     );
     tryDelete(nativePath);
     return nativePathsToPaths(nativeLib, outNativePaths, true); // frees outNativePaths
@@ -269,11 +269,11 @@ export function simplifyPolygon(
 export function simplifyPolygons(
   nativeLib: NativeClipperLibInstance,
   paths: ReadonlyPaths,
-  fillType: PolyFillType = PolyFillType.EvenOdd
+  fillType: PolyFillRule = PolyFillRule.EvenOdd
 ): Paths {
   const nativePaths = pathsToNativePaths(nativeLib, paths);
   try {
-    nativeLib.simplifyPolygonsOverwrite(nativePaths, polyFillTypeToNative(nativeLib, fillType));
+    nativeLib.simplifyPolygonsOverwrite(nativePaths, polyFillRuleToNative(nativeLib, fillType));
     return nativePathsToPaths(nativeLib, nativePaths, true); // frees nativePaths
   } finally {
     tryDelete(nativePaths);

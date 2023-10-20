@@ -3,7 +3,7 @@
  * Others rules include Positive, Negative and ABS_GTR_EQ_TWO (only in OpenGL)
  * see http://glprogramming.com/red/chapter11.html
  */
-export enum PolyFillType {
+export enum PolyFillRule {
   EvenOdd = "evenOdd",
   NonZero = "nonZero",
   Positive = "positive",
@@ -15,10 +15,6 @@ export enum ClipType {
   Union = "union",
   Difference = "difference",
   Xor = "xor",
-}
-export enum PolyType {
-  Subject = "subject",
-  Clip = "clip",
 }
 
 export enum JoinType {
